@@ -1,0 +1,86 @@
+package com.project.hussainproject.drive.controller;
+
+import com.project.hussainproject.drive.model.FileMetadata;
+import com.project.hussainproject.drive.model.User;
+import com.project.hussainproject.drive.repository.FileRepository;
+import com.project.hussainproject.drive.service.FileService;
+import com.project.hussainproject.drive.service.StorageService;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+
+
+import java.util.Map;
+import java.util.UUID;
+
+
+@RestController
+@RequestMapping("/api/files")
+@RequiredArgsConstructor
+public class FileController {
+
+    private final StorageService storageService;
+    private final FileRepository fileRepository;
+    private final FileService fileService;
+
+    @PostMapping("/init-upload")
+    public ResponseEntity<Map<String, String>> initUpload(
+            @RequestParam String fileName,
+            @RequestParam String mimeType){
+        String storageKey = UUID.randomUUID().toString()+"-"+fileName;
+        String uploadUrl = storageService.generateUploadUrl(storageKey, mimeType);
+
+        return ResponseEntity.ok(Map.of(
+                "uploadUrl",uploadUrl,
+                "storageKey",storageKey
+
+        ));
+
+    }
+
+    @PostMapping("/complete-upload")
+    public ResponseEntity<FileMetadata> completeUpload(
+            @AuthenticationPrincipal User user,
+            @RequestParam String fileName,
+            @RequestParam String  storageKey,
+            @RequestParam Long size,
+            @RequestParam String mimeType){
+
+        FileMetadata fileMetadata =  FileMetadata.builder()
+                .originalName(fileName)
+                .storageKey(storageKey)
+                .size(size)
+                .mimeType(mimeType)
+                .owner(user)
+                .isTrashed(false)
+                .build();
+
+        FileMetadata savedFile = fileRepository.save(fileMetadata);
+        return ResponseEntity.ok(savedFile);
+    }
+
+    @PutMapping("/{id}/rename")
+    public ResponseEntity<FileMetadata> renameFile(
+            @PathVariable UUID id,
+            @RequestParam String newName,
+            @AuthenticationPrincipal User user
+    ){
+        return ResponseEntity.ok(fileService.renameFile(id, newName, user));
+    }
+
+    @PutMapping("/{id}/move")
+    public ResponseEntity<FileMetadata> moveFile(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID folderId,
+            @AuthenticationPrincipal User user
+    ){
+        return ResponseEntity.ok(fileService.moveFile(id, folderId, user));
+    }
+
+
+
+
+}
