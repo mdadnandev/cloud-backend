@@ -7,6 +7,7 @@ import com.project.hussainproject.drive.repository.FolderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,14 +31,15 @@ public class FolderService {
                 .isTrashed(false)
                 .build();
 
-
-
         return folderRepository.save(folder);
-
     }
 
-
-
-
-
+    public List<Folder> getFolders(UUID parentId, User user) {
+        if (parentId == null) {
+            return folderRepository.findByOwnerAndParentFolderIsNullAndIsTrashedFalse(user);
+        } else {
+            return folderRepository.findByOwnerAndParentFolderIdAndIsTrashedFalse(user, parentId);
+        }
+    }
 }
+

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,6 +26,13 @@ public class FileController {
     private final StorageService storageService;
     private final FileRepository fileRepository;
     private final FileService fileService;
+
+    @GetMapping
+    public ResponseEntity<List<FileMetadata>> getFiles(
+            @RequestParam(required = false) UUID folderId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(fileService.getFiles(folderId, user));
+    }
 
     @PostMapping("/init-upload")
     public ResponseEntity<Map<String, String>> initUpload(
@@ -84,3 +92,4 @@ public class FileController {
 
 
 }
+

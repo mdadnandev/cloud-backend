@@ -39,6 +39,7 @@ public class FileMetadata {
     @Column(nullable = false)
     private String mimeType;
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
@@ -53,6 +54,7 @@ public class FileMetadata {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "parentFolder", "owner"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id")
     private Folder folder;
