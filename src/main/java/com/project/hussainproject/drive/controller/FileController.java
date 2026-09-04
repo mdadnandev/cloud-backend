@@ -5,6 +5,7 @@ import com.project.hussainproject.drive.model.User;
 import com.project.hussainproject.drive.repository.FileRepository;
 import com.project.hussainproject.drive.service.FileService;
 import com.project.hussainproject.drive.service.StorageService;
+import com.project.hussainproject.drive.repository.ShareRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class FileController {
     private final StorageService storageService;
     private final FileRepository fileRepository;
     private final FileService fileService;
+    private final ShareRepository shareRepository;
 
 
     // GET FILES
@@ -95,9 +97,8 @@ public class FileController {
 
         FileMetadata file = fileRepository.findById(id)
                 .filter(f ->
-                        f.getOwner()
-                                .getId()
-                                .equals(user.getId())
+                        f.getOwner().getId().equals(user.getId()) ||
+                        shareRepository.findByFileIdAndSharedWithId(f.getId(), user.getId()).isPresent()
                 )
                 .orElseThrow(() ->
                         new RuntimeException(
