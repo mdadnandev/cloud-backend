@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/shares")
@@ -32,5 +33,14 @@ public class ShareController {
     @GetMapping("/me")
     public ResponseEntity<List<Share>> getSharedWithMe(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(shareService.getSharedWithMe(user));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteShare(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal User user
+    ) {
+        shareService.deleteShare(id, user);
+        return ResponseEntity.noContent().build();
     }
 }

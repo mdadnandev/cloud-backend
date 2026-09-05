@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -72,5 +73,17 @@ public class ShareService {
 
     public List<Share> getSharedWithMe(User user) {
         return shareRepository.findBySharedWith(user);
+    }
+
+    public void deleteShare(UUID shareId, User user) {
+        Share share = shareRepository.findById(shareId)
+                .orElseThrow(() -> new ResourceNotFoundException("Share not found"));
+
+        if (!share.getSharedWith().getId().equals(user.getId()) &&
+                !share.getSharedBy().getId().equals(user.getId())) {
+            throw new RuntimeException("Access denied");
+        }
+
+        shareRepository.delete(share);
     }
 }
